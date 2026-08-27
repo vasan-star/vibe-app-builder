@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeApp Builder - Launch in Seconds</title>
+    <!-- Built-in Premium Styling via Tailwind CSS CDN (₹0 Cost) -->
+    <script src="https://tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-950 text-zinc-50 font-sans h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <!-- SIDEBAR CONTROL PANEL: Where users enter prompts -->
+    <aside class="w-full md:w-96 bg-zinc-900 border-b md:border-b-0 md:border-r border-zinc-800 p-6 flex flex-col h-1/2 md:h-full justify-between">
+        <div>
+            <!-- Platform Branding -->
+            <div class="flex items-center space-x-2 mb-6">
+                <div class="h-6 w-6 bg-emerald-500 rounded-md flex items-center justify-center font-bold text-black text-sm">⚡</div>
+                <h1 class="text-xl font-bold tracking-tight">VibeApp <span class="text-emerald-400">Builder</span></h1>
+            </div>
+
+            <!-- LIVE CREDIT METRIC BOX (Enforces your 12-credit paywall rule) -->
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 mb-6 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-zinc-400 font-medium uppercase tracking-wider">Available Workspace Balance</p>
+                    <p id="credit-count" class="text-2xl font-extrabold text-emerald-400 mt-1">12 Credits</p>
+                </div>
+                <div class="h-10 w-10 bg-emerald-950 border border-emerald-800 rounded-lg flex items-center justify-center text-emerald-400 font-bold text-sm">
+                    FREE
+                </div>
+            </div>
+
+            <!-- USER PROMPT LOGIC FIELD -->
+            <div class="space-y-4">
+                <label class="block text-sm font-medium text-zinc-300">What application or website do you want to build?</label>
+                <textarea id="user-prompt" placeholder="e.g., Build a sleek coffee shop store front with a dark layout and a dynamic booking calendar grid..." 
+                    class="w-full h-32 bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition resize-none"></textarea>
+                
+                <button id="generate-btn" onclick="triggerCompilation()" 
+                    class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm py-3 px-4 rounded-xl transition duration-200 flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/10">
+                    <span>Compile Architecture</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- FOOTER LOGISTICS & TERMS -->
+        <div class="text-center md:text-left pt-4 border-t border-zinc-800">
+            <p class="text-xs text-zinc-500">Powered by the custom <span class="text-zinc-400 font-medium">Base 1 Engine</span>. Running on zero-budget infrastructure cloud channels.</p>
+        </div>
+    </aside>
+
+    <!-- LIVE WORKSPACE CANVAS: Displays the generated website instantly -->
+    <main class="flex-1 bg-zinc-950 h-1/2 md:h-full flex flex-col">
+        <!-- Live Window Status Header -->
+        <header class="h-12 bg-zinc-900/50 border-b border-zinc-800 px-6 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="h-2 w-2 rounded-full bg-red-500"></div>
+                <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
+                <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                <span class="text-xs text-zinc-400 font-mono pl-2">live-production-sandbox://preview</span>
+            </div>
+            <div class="text-xs text-zinc-500 font-medium uppercase tracking-wider">Sandbox Workspace</div>
+        </header>
+
+        <!-- Sandbox Render Viewport iframe -->
+        <div class="flex-1 p-6">
+            <iframe id="live-viewport" class="w-full h-full bg-white rounded-xl shadow-2xl border border-zinc-800" 
+                srcdoc="<html style='height:100%'><body style='height:100%;display:flex;justify-content:center;align-items:center;font-family:sans-serif;background-color:#18181b;color:#a1a1aa;margin:0;'><div style='text-align:center;'><h3>Workspace Active & Ready</h3><p style='font-size:14px;color:#71717a;'>Type a description on the sidebar and click compile to stream live application code components here.</p></div></body></html>">
+            </iframe>
+        </div>
+    </main>
+
+    <!-- POPUP UPI PAYWALL INTERFACE: Blocks user completely when balance hitting 0 -->
+    <div id="paywall-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
+        <div class="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl">
+            <div class="h-12 w-12 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">⚠️</div>
+            <h3 class="text-xl font-bold text-zinc-50">Free Tier Limit Reached!</h3>
+            <p class="text-sm text-zinc-400 mt-2 leading-relaxed">You have exhausted your 12 free code compilation credits. Unlock unlimited modifications, premium database sharding, and custom domains instantly.</p>
+            
+            <!-- Dynamic UPI / GPay Destination Scanner Frame -->
+            <div class="my-6 p-4 bg-white rounded-xl inline-block shadow-inner mx-auto">
+                <!-- Mock QR Code Placeholder - In production, you paste your PhonePe/GPay QR code image link right here -->
+                <div class="h-40 w-40 bg-zinc-200 border-2 border-dashed border-zinc-400 flex flex-col items-center justify-center text-zinc-500 font-mono text-xs p-2">
+                    <span>[ PASTE YOUR ]</span>
+                    <span class="font-bold text-black mt-1">UPI QR CODE</span>
+                    <span>[ IMAGE HERE ]</span>
+                </div>
+            </div>
+
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 mb-4 text-sm font-semibold text-emerald-400">
+                Lifetime Premium Pass: ₹299 Only
+            </div>
+            
+            <p class="text-xs text-zinc-500 leading-tight">After processing payment via GPay or PhonePe, send a quick screenshot to support to approve your account limits instantly.</p>
+        </div>
+    </div>
+
+    <!-- FRONTEND APP ROUTING LOGIC PIPELINE -->
+    <script>
+        let currentCredits = 12; // Initial state mapped to your 12-credit rule
+        const mockUserId = "test-user-dev-mode"; // Local debugging token string
+
+        async function triggerCompilation() {
+            const promptBox = document.getElementById('user-prompt');
+            const generateBtn = document.getElementById('generate-btn');
+            const liveViewport = document.getElementById('live-viewport');
+            const creditDisplay = document.getElementById('credit-count');
+            const paywallModal = document.getElementById('paywall-modal');
+
+            if (!promptBox.value.trim()) {
+                alert("Please describe what you want the AI engine to generate.");
+                return;
+            }
+
+            // Client-side hard block safeguard trigger
+            if (currentCredits <= 0) {
+                paywallModal.classList.remove('hidden');
+                return;
+            }
+
+            // Visual loading feedback state
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = `<span>Compiling System Layers...</span>`;
+            liveViewport.srcdoc = "<html><body style='background:#18181b;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;'><div><h4>Base 1 Model Running...</h4><p style='color:#71717a;font-size:13px;'>Writing custom full-stack file configurations. Please wait.</p></div></body></html>";
+
+            try {
+                // Post network frame to your live serverless route file
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: mockUserId, userPrompt: promptBox.value })
+                });
+
+                const result = await response.json();
+
+                if (response.status === 403 || result.error === "PAYWALL_TRIGGERED") {
+                    paywallModal.classList.remove('hidden');
+                    return;
+                }
+
+                if (result.success && result.htmlOutput) {
+                    // Update current runtime client states
+                    currentCredits = result.remainingCredits;
+                    creditDisplay.innerText = `${currentCredits} Credits`;
+                    
+                    // Inject the raw generated website code directly into the workspace browser iframe window
+                    liveViewport.srcdoc = result.htmlOutput;
+                } else {
+                    alert("Compilation Exception: " + (result.error || "Unknown server execution flaw."));
+                }
+            } catch (err) {
+                // Local dev preview mock fallback (Allows you to safely tap Play inside Acode right now without server links!)
+                console.log("Running in offline local preview mode.");
+                currentCredits--;
+                creditDisplay.innerText = `${currentCredits} Credits`;
+                
+                // Fallback visual mock simulation layout
+                liveViewport.srcdoc = `
+                    <html>
+                    <script src="https://tailwindcss.com"><\/script>
+                    <body class="bg-zinc-900 text-white flex flex-col justify-center items-center h-screen font-sans p-6 text-center">
