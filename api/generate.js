@@ -72,9 +72,9 @@ Requirements:
     if (!response.ok) {
       console.error("Gemini API error:", data);
 
-      return res.status(500).json({
-        error: "Gemini API request failed."
-      });
+      return res.status(response.status || 500).json({
+  error: data?.error?.message || "Gemini API request failed."
+});      
     }
 
     const generatedText =
