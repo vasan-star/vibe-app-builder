@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QV37 AI - AI App Builder</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #09090b;
+      color: #fafafa;
+      font-family: Arial, sans-serif;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #preview-frame {
+      width: 100%;
+      height: 650px;
+      border: 0;
+      border-radius: 12px;
+      background: white;
+    }
+
+    .loader {
+      width: 19px;
+      height: 19px;
+      border: 3px solid #064e3b;
+      border-top-color: #10b981;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="border-b border-zinc-800 bg-zinc-950">
+    <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-black font-black">
+          ⚡
+        </div>
+
+        <div>
+          <h1 class="text-xl font-black">
+            QV37 <span class="text-emerald-400">AI</span>
+          </h1>
+
+          <p class="text-xs text-zinc-500">
+            AI Website & App Builder
+          </p>
+        </div>
+      </div>
+
+      <div class="text-sm text-zinc-400">
+        <span id="credit-count">12</span> credits
+      </div>
+
+    </div>
+  </header>
+
+
+  <!-- MAIN -->
+  <main class="max-w-7xl mx-auto p-4 md:p-6">
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+
+      <!-- BUILDER -->
+      <section class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+
+        <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest">
+          QV37 AI
+        </p>
+
+        <h2 class="text-3xl font-black mt-2">
+          Build with AI
+        </h2>
+
+        <p class="text-sm text-zinc-400 mt-2">
+          Describe the website or application you want QV37 AI to create.
+        </p>
+
+
+        <!-- PROMPT -->
+        <label
+          for="user-prompt"
+          class="block text-sm font-semibold text-zinc-300 mt-6 mb-2"
+        >
+          Your idea
+        </label>
+
+        <textarea
+          id="user-prompt"
+          class="w-full h-44 bg-zinc-950 border border-zinc-700 rounded-xl p-4 text-sm text-white outline-none resize-none focus:border-emerald-500"
+          placeholder="Example: Build a food delivery website with restaurants, menu, cart and checkout."
+        >Create a premium Vadapav delivery website with a dark theme, orange accents, menu cards, shopping cart and checkout.</textarea>
+
+
+        <!-- BUILD BUTTON -->
+        <button
+          id="generate-btn"
+          type="button"
+          class="mt-4 w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2"
+        >
+
+          <span id="button-text">
+            Build App
+          </span>
+
+          <span id="loader" class="loader hidden"></span>
+
+        </button>
+
+
+        <!-- STATUS -->
+        <div
+          id="status"
+          class="hidden mt-4 p-3 rounded-xl border text-sm"
+        ></div>
+
+
+        <!-- EXAMPLES -->
+        <div class="mt-6">
+
+          <p class="text-xs text-zinc-500 mb-2">
+            Example prompts
+          </p>
+
+          <div class="flex flex-wrap gap-2">
+
+            <button
+              class="example-btn bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg text-xs"
+              data-prompt="Create a modern pizza delivery website with pizza menu cards, prices, cart and checkout."
+            >
+              Pizza
+            </button>
+
+            <button
+              class="example-btn bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg text-xs"
+              data-prompt="Create a professional developer portfolio with hero section, skills, projects, experience and contact form."
+            >
+              Portfolio
+            </button>
+
+            <button
+              class="example-btn bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg text-xs"
+              data-prompt="Create an online clothing store with products, categories, prices, shopping cart and checkout."
+            >
+              Store
+            </button>
+
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- PREVIEW -->
+      <section class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+
+        <div class="h-12 px-4 border-b border-zinc-800 flex items-center justify-between">
+
+          <div class="flex items-center gap-2">
+
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+
+            <span class="text-xs text-zinc-500 ml-2">
+              QV37 AI Preview
+            </span>
+
+          </div>
+
+          <span class="text-xs text-zinc-500">
+            LIVE
+          </span>
+
+        </div>
+
+
+        <div class="p-4">
+
+          <!-- EMPTY PREVIEW -->
+          <div
+            id="placeholder"
+            class="h-[650px] flex items-center justify-center text-center"
+          >
+
+            <div>
+
+              <div class="text-5xl mb-5">
+                ⚡
+              </div>
+
+              <h3 class="text-xl font-bold text-zinc-300">
+                AI app preview
+              </h3>
+
+              <p class="text-sm text-zinc-600 mt-2">
+                Describe your idea and click Build App.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- AI GENERATED APPLICATION -->
+          <iframe
+            id="preview-frame"
+            class="hidden"
+            sandbox="allow-scripts allow-forms allow-modals"
+            title="QV37 AI generated application"
+          ></iframe>
+
+        </div>
+
+      </section>
+
+    </div>
+
+
+    <!-- HOW IT WORKS -->
+    <section class="mt-6 bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+
+      <h3 class="font-bold text-lg">
+        How QV37 AI works
+      </h3>
+
+      <p class="text-sm text-zinc-400 mt-2">
+        Your request is sent securely to the QV37 AI backend.
+        The backend sends the request to the AI model and returns
+        the generated application to the preview.
+      </p>
+
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+
+
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+
+          <div class="text-emerald-400 font-bold">
+            01
+          </div>
+
+          <h4 class="font-bold mt-2">
+            Describe
+          </h4>
+
+          <p class="text-xs text-zinc-500 mt-1">
+            Tell QV37 AI what you want.
+          </p>
+
+        </div>
+
+
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+
+          <div class="text-emerald-400 font-bold">
+            02
+          </div>
+
+          <h4 class="font-bold mt-2">
+            Generate
+          </h4>
+
+          <p class="text-xs text-zinc-500 mt-1">
+            Your request is sent to the cloud AI backend.
+          </p>
+
+        </div>
+
+
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+
+          <div class="text-emerald-400 font-bold">
+            03
+          </div>
+
+          <h4 class="font-bold mt-2">
+            Preview
+          </h4>
+
+          <p class="text-xs text-zinc-500 mt-1">
+            The generated application appears here.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- QV37 AI FRONTEND LOGIC -->
+  <script>
+
+    let credits = 12;
+
+
+    const promptBox =
+      document.getElementById("user-prompt");
+
+    const generateBtn =
+      document.getElementById("generate-btn");
+
+    const buttonText =
+      document.getElementById("button-text");
+
+    const loader =
+      document.getElementById("loader");
+
+    const status =
+      document.getElementById("status");
+
+    const placeholder =
+      document.getElementById("placeholder");
+
+    const previewFrame =
+      document.getElementById("preview-frame");
+
+    const creditCount =
+      document.getElementById("credit-count");
+
+
+    function showStatus(message, type = "info") {
+
+      status.className =
+        "mt-4 p-3 rounded-xl border text-sm";
+
+      if (type === "error") {
+
+        status.classList.add(
+          "bg-red-950",
+          "border-red-800",
+          "text-red-300"
+        );
+
+      } else {
+
+        status.classList.add(
+          "bg-zinc-950",
+          "border-zinc-800",
+          "text-zinc-400"
+        );
+
+      }
+
+      status.textContent = message;
+    }
+
+
+    function setLoading(value) {
+
+      generateBtn.disabled = value;
+
+      if (value) {
+
+        buttonText.textContent =
+          "Generating...";
+
+        loader.classList.remove("hidden");
+
+      } else {
+
+        buttonText.textContent =
+          "Build App";
+
+        loader.classList.add("hidden");
+
+      }
+    }
+
+
+    /*
+      REAL CLOUD AI GENERATION
+    */
+
+    generateBtn.addEventListener(
+      "click",
+      async function () {
+
+        const prompt =
+          promptBox.value.trim();
+
+
+        if (!prompt) {
+
+          showStatus(
+            "Please enter an application idea.",
+            "error"
+          );
+
+          return;
+        }
+
+
+        if (credits <= 0) {
+
+          showStatus(
+            "Your free credits are exhausted.",
+            "error"
+          );
+
+          return;
+        }
+
+
+        setLoading(true);
+
+        showStatus(
+          "QV37 AI is generating your application..."
+        );
+
+
+        try {
+
+          const response =
+            await fetch(
+              "/api/generate",
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json"
+                },
+
+                body: JSON.stringify({
+                  prompt: prompt
+                })
+              }
+            );
+
+
+          const data =
+            await response.json();
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              data.error ||
+              "AI generation failed."
+            );
+          }
+
+
+          const generatedHTML =
+            data.html;
+
+
+          if (
+            typeof generatedHTML !== "string" ||
+            generatedHTML.trim().length < 50
+          ) {
+
+            throw new Error(
+              "The AI returned no usable application."
+            );
+          }
+
+
+          /*
+            DISPLAY REAL AI GENERATED APP
+          */
+
+          previewFrame.srcdoc =
+            generatedHTML;
+
+
+          placeholder.classList.add(
+            "hidden"
+          );
+
+          previewFrame.classList.remove(
+            "hidden"
+          );
+
+
+          credits--;
+
+          creditCount.textContent =
+            credits;
+
+
+          showStatus(
+            "AI application generated successfully."
+          );
+
+        } catch (error) {
+
+          console.error(
+            "QV37 AI error:",
+            error
+          );
+
+          showStatus(
+            error.message ||
+            "Unable to generate the application.",
+            "error"
+          );
+
+        } finally {
+
+          setLoading(false);
+        }
+
+      }
+    );
+
+
+    /*
+      EXAMPLE PROMPTS
+    */
+
+    document
+      .querySelectorAll(".example-btn")
+      .forEach(function (button) {
+
+        button.addEventListener(
+          "click",
+          function () {
+
+            promptBox.value =
+              this.dataset.prompt;
+
+            promptBox.focus();
+
+          }
+        );
+
+      });
+
+  </script>
+
+</body>
+</html>
