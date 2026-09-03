@@ -1,0 +1,2345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>QV37 AI - AI App Builder</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      background: #09090b;
+      color: #fafafa;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #chat-area {
+      height: calc(100vh - 73px);
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+
+    #preview-frame {
+      width: 100%;
+      min-height: 650px;
+      border: 0;
+      border-radius: 12px;
+      background: white;
+    }
+
+    .loader {
+      width: 19px;
+      height: 19px;
+      border: 3px solid #064e3b;
+      border-top-color: #10b981;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .message-user {
+      background: #18181b;
+      border: 1px solid #27272a;
+    }
+
+    .message-ai {
+      background: #0f0f12;
+      border: 1px solid #27272a;
+    }
+
+    .password-strength {
+      height: 5px;
+      border-radius: 999px;
+      background: #27272a;
+      overflow: hidden;
+    }
+
+    .password-strength-bar {
+      height: 100%;
+      width: 0%;
+      transition: width 0.25s ease;
+    }
+
+    .auth-input {
+      width: 100%;
+      background: #09090b;
+      border: 1px solid #3f3f46;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .auth-input:focus {
+      border-color: #10b981;
+    }
+
+    .social-btn {
+      width: 100%;
+      border: 1px solid #3f3f46;
+      background: #18181b;
+      border-radius: 12px;
+      padding: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    .social-btn:hover {
+      background: #27272a;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+
+  <header class="h-[73px] border-b border-zinc-800 bg-zinc-950">
+
+    <div class="max-w-6xl mx-auto px-4 h-full flex items-center justify-between">
+
+      <div class="flex items-center gap-3">
+
+        <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-black font-black">
+          ⚡
+        </div>
+
+        <div>
+
+          <h1 class="text-xl font-black">
+            QV37 <span class="text-emerald-400">AI</span>
+          </h1>
+
+          <p class="text-xs text-zinc-500">
+            AI Website & App Builder
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="flex items-center gap-3">
+
+        <div class="text-sm text-zinc-400">
+          <span id="credit-count">—</span> credits
+        </div>
+
+        <button
+          id="auth-btn"
+          class="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-sm font-semibold"
+        >
+          Login / Sign Up
+        </button>
+
+        <button
+          id="logout-btn"
+          class="hidden bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-sm font-semibold"
+        >
+          Logout
+        </button>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- CHAT AREA -->
+
+  <main id="chat-area">
+
+    <div class="max-w-4xl mx-auto px-4 py-8">
+
+      <!-- WELCOME -->
+
+      <div id="welcome-message" class="text-center py-10">
+
+        <div class="text-5xl mb-5">
+          ⚡
+        </div>
+
+        <h2 class="text-3xl md:text-4xl font-black">
+          Build with QV37 AI
+        </h2>
+
+        <p class="text-zinc-400 mt-3 max-w-xl mx-auto">
+          Describe the website or application you want.
+          QV37 AI will generate the application for you.
+        </p>
+
+        <div class="flex flex-wrap justify-center gap-2 mt-6">
+
+          <button
+            class="example-btn bg-zinc-900 border border-zinc-800 hover:border-zinc-700 px-4 py-2 rounded-xl text-sm"
+            data-prompt="Create a modern pizza delivery website with pizza menu cards, prices, cart and checkout."
+          >
+            🍕 Pizza
+          </button>
+
+          <button
+            class="example-btn bg-zinc-900 border border-zinc-800 hover:border-zinc-700 px-4 py-2 rounded-xl text-sm"
+            data-prompt="Create a professional developer portfolio with hero section, skills, projects, experience and contact form."
+          >
+            💻 Portfolio
+          </button>
+
+          <button
+            class="example-btn bg-zinc-900 border border-zinc-800 hover:border-zinc-700 px-4 py-2 rounded-xl text-sm"
+            data-prompt="Create an online clothing store with products, categories, prices, shopping cart and checkout."
+          >
+            👕 Store
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- CONVERSATION -->
+
+      <div id="conversation"></div>
+
+
+      <!-- PREVIEW -->
+
+      <section
+        id="preview-section"
+        class="hidden mt-8 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden"
+      >
+
+        <div class="h-12 px-4 border-b border-zinc-800 flex items-center justify-between">
+
+          <div class="flex items-center gap-2">
+
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+
+            <span class="text-xs text-zinc-500 ml-2">
+              QV37 AI Preview
+            </span>
+
+          </div>
+
+          <span class="text-xs text-emerald-400">
+            LIVE
+          </span>
+
+        </div>
+
+        <div class="p-4">
+
+          <iframe
+            id="preview-frame"
+            sandbox="allow-scripts allow-forms allow-modals"
+            title="QV37 AI generated application"
+          ></iframe>
+
+        </div>
+
+      </section>
+
+
+      <!-- HOW IT WORKS -->
+
+      <section class="mt-8 bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+
+        <h3 class="font-bold text-lg">
+          How QV37 AI works
+        </h3>
+
+        <p class="text-sm text-zinc-400 mt-2">
+          Describe your idea, let QV37 AI generate the application,
+          then preview the result instantly.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+
+          <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+            <div class="text-emerald-400 font-bold">01</div>
+            <h4 class="font-bold mt-2">Describe</h4>
+            <p class="text-xs text-zinc-500 mt-1">
+              Tell QV37 AI what you want.
+            </p>
+          </div>
+
+          <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+            <div class="text-emerald-400 font-bold">02</div>
+            <h4 class="font-bold mt-2">Generate</h4>
+            <p class="text-xs text-zinc-500 mt-1">
+              Your request is sent securely to the AI backend.
+            </p>
+          </div>
+
+          <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+            <div class="text-emerald-400 font-bold">03</div>
+            <h4 class="font-bold mt-2">Preview</h4>
+            <p class="text-xs text-zinc-500 mt-1">
+              Your generated application appears above.
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+
+  <!-- BOTTOM COMPOSER -->
+
+  <div class="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent pt-5 pb-4">
+
+    <div class="max-w-4xl mx-auto px-4">
+
+      <div
+        id="status"
+        class="hidden mb-3 p-3 rounded-xl border text-sm"
+      ></div>
+
+      <div class="bg-zinc-900 border border-zinc-700 rounded-2xl p-2 shadow-2xl">
+
+        <textarea
+          id="user-prompt"
+          rows="2"
+          class="w-full bg-transparent px-3 py-2 text-sm text-white outline-none resize-none"
+          placeholder="Describe the website or app you want to build..."
+        ></textarea>
+
+        <div class="flex items-center justify-between px-2 pb-1">
+
+          <span class="text-xs text-zinc-600">
+            One prompt → one generated app
+          </span>
+
+          <button
+            id="generate-btn"
+            type="button"
+            class="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-2"
+          >
+
+            <span id="button-text">
+              Build App
+            </span>
+
+            <span id="loader" class="loader hidden"></span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- AUTH MODAL -->
+
+  <div
+    id="auth-modal"
+    class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto"
+  >
+
+    <div class="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6 my-6">
+
+      <div class="flex items-center justify-between">
+
+        <div>
+
+          <h2 id="auth-title" class="text-2xl font-black">
+            Login
+          </h2>
+
+          <p id="auth-subtitle" class="text-sm text-zinc-500 mt-1">
+            Access your QV37 AI credits.
+          </p>
+
+        </div>
+
+        <button
+          id="close-auth"
+          class="text-zinc-500 hover:text-white text-xl"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div
+        id="auth-message"
+        class="hidden mt-4 p-3 rounded-xl border text-sm"
+      ></div>
+
+
+      <!-- SOCIAL LOGIN -->
+
+      <div id="social-login" class="mt-5">
+
+        <button
+          id="google-btn"
+          type="button"
+          class="social-btn"
+        >
+          🌐 Continue with Google
+        </button>
+
+      </div>
+
+
+      <div id="or-divider" class="flex items-center gap-3 my-5">
+
+        <div class="h-px bg-zinc-800 flex-1"></div>
+
+        <span class="text-xs text-zinc-600">
+          OR
+        </span>
+
+        <div class="h-px bg-zinc-800 flex-1"></div>
+
+      </div>
+
+
+      <!-- AUTH FORM -->
+
+      <form id="auth-form">
+
+        <!-- EMAIL -->
+
+        <label class="block text-sm text-zinc-300 mb-2">
+          Email
+        </label>
+
+        <input
+          id="auth-email"
+          type="email"
+          required
+          autocomplete="email"
+          class="auth-input"
+          placeholder="you@example.com"
+        >
+
+
+        <!-- PASSWORD -->
+
+        <div class="flex items-center justify-between mt-4 mb-2">
+
+          <label class="block text-sm text-zinc-300">
+            Password
+          </label>
+
+          <button
+            id="forgot-password-btn"
+            type="button"
+            class="text-xs text-emerald-400 hover:text-emerald-300"
+          >
+            Forgot password?
+          </button>
+
+        </div>
+
+        <div class="relative">
+
+          <input
+            id="auth-password"
+            type="password"
+            required
+            minlength="8"
+            autocomplete="current-password"
+            class="auth-input pr-12"
+            placeholder="At least 8 characters"
+          >
+
+          <button
+            id="toggle-password"
+            type="button"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+          >
+            👁️
+          </button>
+
+        </div>
+
+
+        <!-- PASSWORD STRENGTH -->
+
+        <div id="password-strength-area" class="mt-2">
+
+          <div class="password-strength">
+
+            <div
+              id="password-strength-bar"
+              class="password-strength-bar"
+            ></div>
+
+          </div>
+
+          <p
+            id="password-strength-text"
+            class="text-xs text-zinc-600 mt-1"
+          ></p>
+
+        </div>
+
+
+        <!-- CONFIRM PASSWORD -->
+
+        <div id="confirm-password-area" class="hidden">
+
+          <label class="block text-sm text-zinc-300 mt-4 mb-2">
+            Confirm password
+          </label>
+
+          <div class="relative">
+
+            <input
+              id="auth-confirm-password"
+              type="password"
+              minlength="8"
+              autocomplete="new-password"
+              class="auth-input pr-12"
+              placeholder="Enter your password again"
+            >
+
+            <button
+              id="toggle-confirm-password"
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+            >
+              👁️
+            </button>
+
+          </div>
+
+          <p
+            id="password-match-text"
+            class="text-xs mt-1 text-zinc-600"
+          ></p>
+
+        </div>
+
+
+        <!-- TERMS -->
+
+        <div id="terms-area" class="hidden mt-4">
+
+          <label class="flex items-start gap-2 text-xs text-zinc-500">
+
+            <input
+              id="terms-checkbox"
+              type="checkbox"
+              class="mt-0.5"
+            >
+
+            <span>
+              I agree to QV37 AI's
+              <a href="#" class="text-emerald-400">
+                Terms
+              </a>
+              and
+              <a href="#" class="text-emerald-400">
+                Privacy Policy
+              </a>.
+            </span>
+
+          </label>
+
+        </div>
+
+
+        <!-- SUBMIT -->
+
+        <button
+          id="auth-submit"
+          type="submit"
+          class="mt-5 w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3 rounded-xl"
+        >
+          Login
+        </button>
+
+      </form>
+
+
+      <!-- SWITCH -->
+
+      <button
+        id="auth-switch"
+        class="mt-4 w-full text-sm text-emerald-400 hover:text-emerald-300"
+      >
+        Don't have an account? Sign Up
+      </button>
+
+
+      <!-- RESEND VERIFICATION -->
+
+      <button
+        id="resend-verification"
+        type="button"
+        class="hidden mt-3 w-full text-xs text-zinc-500 hover:text-emerald-400"
+      >
+        Resend verification email
+      </button>
+
+
+      <!-- RESET PASSWORD -->
+
+      <div id="reset-password-section" class="hidden">
+
+        <div class="mt-5">
+
+          <label class="block text-sm text-zinc-300 mb-2">
+            New password
+          </label>
+
+          <div class="relative">
+
+            <input
+              id="new-password"
+              type="password"
+              minlength="8"
+              class="auth-input pr-12"
+              placeholder="At least 8 characters"
+            >
+
+            <button
+              id="toggle-new-password"
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500"
+            >
+              👁️
+            </button>
+
+          </div>
+
+          <label class="block text-sm text-zinc-300 mt-4 mb-2">
+            Confirm new password
+          </label>
+
+          <input
+            id="new-password-confirm"
+            type="password"
+            minlength="8"
+            class="auth-input"
+            placeholder="Enter your new password again"
+          >
+
+          <button
+            id="save-new-password"
+            type="button"
+            class="mt-5 w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3 rounded-xl"
+          >
+            Save new password
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- FRONTEND LOGIC -->
+
+  <script>
+
+    /*
+      SUPABASE
+    */
+
+    const SUPABASE_URL =
+      "https://rppobycydcfaxqspkxir.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_SNjIQcTbQMe_4g66_iI8hQ_WRJaDqZU";
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+      );
+
+
+    /*
+      ELEMENTS
+    */
+
+    const promptBox =
+      document.getElementById("user-prompt");
+
+    const generateBtn =
+      document.getElementById("generate-btn");
+
+    const buttonText =
+      document.getElementById("button-text");
+
+    const loader =
+      document.getElementById("loader");
+
+    const status =
+      document.getElementById("status");
+
+    const creditCount =
+      document.getElementById("credit-count");
+
+    const conversation =
+      document.getElementById("conversation");
+
+    const welcomeMessage =
+      document.getElementById("welcome-message");
+
+    const previewSection =
+      document.getElementById("preview-section");
+
+    const previewFrame =
+      document.getElementById("preview-frame");
+
+    const chatArea =
+      document.getElementById("chat-area");
+
+    const authBtn =
+      document.getElementById("auth-btn");
+
+    const logoutBtn =
+      document.getElementById("logout-btn");
+
+    const authModal =
+      document.getElementById("auth-modal");
+
+    const closeAuth =
+      document.getElementById("close-auth");
+
+    const authForm =
+      document.getElementById("auth-form");
+
+    const authTitle =
+      document.getElementById("auth-title");
+
+    const authSubtitle =
+      document.getElementById("auth-subtitle");
+
+    const authSubmit =
+      document.getElementById("auth-submit");
+
+    const authSwitch =
+      document.getElementById("auth-switch");
+
+    const authEmail =
+      document.getElementById("auth-email");
+
+    const authPassword =
+      document.getElementById("auth-password");
+
+    const authConfirmPassword =
+      document.getElementById("auth-confirm-password");
+
+    const authMessage =
+      document.getElementById("auth-message");
+
+    const confirmPasswordArea =
+      document.getElementById("confirm-password-area");
+
+    const termsArea =
+      document.getElementById("terms-area");
+
+    const termsCheckbox =
+      document.getElementById("terms-checkbox");
+
+    const forgotPasswordBtn =
+      document.getElementById("forgot-password-btn");
+
+    const resendVerification =
+      document.getElementById("resend-verification");
+
+    const togglePassword =
+      document.getElementById("toggle-password");
+
+    const toggleConfirmPassword =
+      document.getElementById("toggle-confirm-password");
+
+    const passwordStrengthBar =
+      document.getElementById("password-strength-bar");
+
+    const passwordStrengthText =
+      document.getElementById("password-strength-text");
+
+    const passwordMatchText =
+      document.getElementById("password-match-text");
+
+    const googleBtn =
+      document.getElementById("google-btn");
+
+    const socialLogin =
+      document.getElementById("social-login");
+
+    const orDivider =
+      document.getElementById("or-divider");
+
+    const resetPasswordSection =
+      document.getElementById("reset-password-section");
+
+    const newPassword =
+      document.getElementById("new-password");
+
+    const newPasswordConfirm =
+      document.getElementById("new-password-confirm");
+
+    const saveNewPassword =
+      document.getElementById("save-new-password");
+
+    const toggleNewPassword =
+      document.getElementById("toggle-new-password");
+
+
+    let authMode = "login";
+
+    let recoveryMode = false;
+
+
+    /*
+      STATUS
+    */
+
+    function showStatus(message, type = "info") {
+
+      status.className =
+        "mb-3 p-3 rounded-xl border text-sm";
+
+      if (type === "error") {
+
+        status.classList.add(
+          "bg-red-950",
+          "border-red-800",
+          "text-red-300"
+        );
+
+      } else {
+
+        status.classList.add(
+          "bg-zinc-950",
+          "border-zinc-800",
+          "text-zinc-400"
+        );
+
+      }
+
+      status.textContent = message;
+
+      status.classList.remove("hidden");
+
+    }
+
+
+    function hideStatus() {
+
+      status.classList.add("hidden");
+
+    }
+
+
+    /*
+      LOADING
+    */
+
+    function setLoading(value) {
+
+      generateBtn.disabled = value;
+
+      if (value) {
+
+        buttonText.textContent =
+          "Generating...";
+
+        loader.classList.remove("hidden");
+
+      } else {
+
+        buttonText.textContent =
+          "Build App";
+
+        loader.classList.add("hidden");
+
+      }
+
+    }
+
+
+    /*
+      SCROLL
+    */
+
+    function scrollToBottom() {
+
+      setTimeout(function () {
+
+        chatArea.scrollTop =
+          chatArea.scrollHeight;
+
+      }, 100);
+
+    }
+
+
+    /*
+      CHAT MESSAGES
+    */
+
+    function addUserMessage(prompt) {
+
+      welcomeMessage.classList.add("hidden");
+
+      const wrapper =
+        document.createElement("div");
+
+      wrapper.className =
+        "flex justify-end mb-5";
+
+      wrapper.innerHTML = `
+        <div class="message-user max-w-3xl rounded-2xl px-5 py-4">
+          <div class="text-xs text-zinc-500 mb-2">You</div>
+          <div class="text-sm leading-6 whitespace-pre-wrap"></div>
+        </div>
+      `;
+
+      wrapper
+        .querySelector(".whitespace-pre-wrap")
+        .textContent = prompt;
+
+      conversation.appendChild(wrapper);
+
+      scrollToBottom();
+
+    }
+
+
+    function addAIMessage(message) {
+
+      const wrapper =
+        document.createElement("div");
+
+      wrapper.className =
+        "flex justify-start mb-6";
+
+      wrapper.innerHTML = `
+        <div class="message-ai max-w-3xl rounded-2xl px-5 py-4">
+          <div class="text-xs text-emerald-400 mb-2 font-bold">
+            QV37 AI
+          </div>
+          <div class="text-sm text-zinc-300 leading-6 whitespace-pre-wrap"></div>
+        </div>
+      `;
+
+      wrapper
+        .querySelector(".whitespace-pre-wrap")
+        .textContent = message;
+
+      conversation.appendChild(wrapper);
+
+      scrollToBottom();
+
+    }
+
+
+    /*
+      AUTH MESSAGE
+    */
+
+    function showAuthMessage(message, type = "info") {
+
+      authMessage.className =
+        "mt-4 p-3 rounded-xl border text-sm";
+
+      if (type === "error") {
+
+        authMessage.classList.add(
+          "bg-red-950",
+          "border-red-800",
+          "text-red-300"
+        );
+
+      } else {
+
+        authMessage.classList.add(
+          "bg-zinc-950",
+          "border-zinc-800",
+          "text-zinc-400"
+        );
+
+      }
+
+      authMessage.textContent =
+        message;
+
+      authMessage.classList.remove("hidden");
+
+    }
+
+
+    /*
+      OPEN AUTH
+    */
+
+    function openAuth(mode = "login") {
+
+      recoveryMode = false;
+
+      authMode = mode;
+
+      authModal.classList.remove("hidden");
+
+      authMessage.classList.add("hidden");
+
+      resetPasswordSection.classList.add("hidden");
+
+      authForm.classList.remove("hidden");
+
+      socialLogin.classList.remove("hidden");
+
+      orDivider.classList.remove("hidden");
+
+      forgotPasswordBtn.classList.toggle(
+        "hidden",
+        authMode !== "login"
+      );
+
+      confirmPasswordArea.classList.toggle(
+        "hidden",
+        authMode !== "signup"
+      );
+
+      termsArea.classList.toggle(
+        "hidden",
+        authMode !== "signup"
+      );
+
+      resendVerification.classList.add("hidden");
+
+      passwordStrengthText.textContent = "";
+
+      passwordStrengthBar.style.width = "0%";
+
+      passwordMatchText.textContent = "";
+
+      if (authMode === "login") {
+
+        authTitle.textContent =
+          "Login";
+
+        authSubtitle.textContent =
+          "Access your QV37 AI credits.";
+
+        authSubmit.textContent =
+          "Login";
+
+        authSwitch.textContent =
+          "Don't have an account? Sign Up";
+
+        authPassword.autocomplete =
+          "current-password";
+
+      } else {
+
+        authTitle.textContent =
+          "Create your QV37 account";
+
+        authSubtitle.textContent =
+          "Create an account to save your credits.";
+
+        authSubmit.textContent =
+          "Create Account";
+
+        authSwitch.textContent =
+          "Already have an account? Login";
+
+        authPassword.autocomplete =
+          "new-password";
+
+      }
+
+    }
+
+
+    function closeAuthModal() {
+
+      authModal.classList.add("hidden");
+
+    }
+
+
+    /*
+      PASSWORD VISIBILITY
+    */
+
+    function togglePasswordVisibility(input, button) {
+
+      if (input.type === "password") {
+
+        input.type = "text";
+
+        button.textContent = "🙈";
+
+      } else {
+
+        input.type = "password";
+
+        button.textContent = "👁️";
+
+      }
+
+    }
+
+
+    togglePassword.addEventListener(
+      "click",
+      function () {
+
+        togglePasswordVisibility(
+          authPassword,
+          togglePassword
+        );
+
+      }
+    );
+
+
+    toggleConfirmPassword.addEventListener(
+      "click",
+      function () {
+
+        togglePasswordVisibility(
+          authConfirmPassword,
+          toggleConfirmPassword
+        );
+
+      }
+    );
+
+
+    toggleNewPassword.addEventListener(
+      "click",
+      function () {
+
+        togglePasswordVisibility(
+          newPassword,
+          toggleNewPassword
+        );
+
+      }
+    );
+
+
+    /*
+      PASSWORD STRENGTH
+    */
+
+    function updatePasswordStrength() {
+
+      const password =
+        authPassword.value;
+
+      if (!password) {
+
+        passwordStrengthBar.style.width =
+          "0%";
+
+        passwordStrengthText.textContent =
+          "";
+
+        return;
+
+      }
+
+      let score = 0;
+
+      if (password.length >= 8)
+        score++;
+
+      if (password.length >= 12)
+        score++;
+
+      if (/[A-Z]/.test(password))
+        score++;
+
+      if (/[a-z]/.test(password))
+        score++;
+
+      if (/[0-9]/.test(password))
+        score++;
+
+      if (/[^A-Za-z0-9]/.test(password))
+        score++;
+
+
+      const percent =
+        Math.min(score / 6 * 100, 100);
+
+      passwordStrengthBar.style.width =
+        percent + "%";
+
+
+      if (score <= 2) {
+
+        passwordStrengthText.textContent =
+          "Weak password";
+
+      } else if (score <= 4) {
+
+        passwordStrengthText.textContent =
+          "Medium password";
+
+      } else {
+
+        passwordStrengthText.textContent =
+          "Strong password";
+
+      }
+
+    }
+
+
+    authPassword.addEventListener(
+      "input",
+      function () {
+
+        updatePasswordStrength();
+
+        checkPasswordMatch();
+
+      }
+    );
+
+
+    authConfirmPassword.addEventListener(
+      "input",
+      checkPasswordMatch
+    );
+
+
+    function checkPasswordMatch() {
+
+      if (authMode !== "signup")
+        return;
+
+      if (!authConfirmPassword.value) {
+
+        passwordMatchText.textContent =
+          "";
+
+        return;
+
+      }
+
+      if (
+        authPassword.value ===
+        authConfirmPassword.value
+      ) {
+
+        passwordMatchText.textContent =
+          "✓ Passwords match";
+
+        passwordMatchText.className =
+          "text-xs mt-1 text-emerald-400";
+
+      } else {
+
+        passwordMatchText.textContent =
+          "Passwords do not match";
+
+        passwordMatchText.className =
+          "text-xs mt-1 text-red-400";
+
+      }
+
+    }
+
+
+    /*
+      CLAIM CREDITS
+    */
+
+    async function claimCredits() {
+
+      try {
+
+        const {
+          data: sessionData
+        } =
+          await supabaseClient.auth.getSession();
+
+        const session =
+          sessionData.session;
+
+        if (!session) {
+
+          creditCount.textContent =
+            "1";
+
+          return;
+
+        }
+
+
+        const response =
+          await fetch(
+            "/api/claim-credits",
+            {
+              method: "POST",
+
+              headers: {
+                Authorization:
+                  "Bearer " +
+                  session.access_token
+              }
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.error ||
+            "Unable to load credits."
+          );
+
+        }
+
+
+        creditCount.textContent =
+          Number(data.credits);
+
+      } catch (error) {
+
+        console.error(
+          "Credit loading error:",
+          error
+        );
+
+      }
+
+    }
+
+
+    /*
+      AUTH UI
+    */
+
+    async function updateAuthUI(session) {
+
+      if (session) {
+
+        authBtn.classList.add("hidden");
+
+        logoutBtn.classList.remove("hidden");
+
+        await claimCredits();
+
+      } else {
+
+        authBtn.classList.remove("hidden");
+
+        logoutBtn.classList.add("hidden");
+
+        creditCount.textContent =
+          "1";
+
+      }
+
+    }
+
+
+    /*
+      SIGN UP / LOGIN
+    */
+
+    authForm.addEventListener(
+      "submit",
+      async function (event) {
+
+        event.preventDefault();
+
+
+        const email =
+          authEmail.value.trim();
+
+        const password =
+          authPassword.value;
+
+
+        authSubmit.disabled =
+          true;
+
+        authSubmit.textContent =
+          "Please wait...";
+
+        authMessage.classList.add(
+          "hidden"
+        );
+
+
+        try {
+
+          /*
+            SIGN UP
+          */
+
+          if (authMode === "signup") {
+
+            if (
+              password !==
+              authConfirmPassword.value
+            ) {
+
+              throw new Error(
+                "Passwords do not match."
+              );
+
+            }
+
+
+            if (!termsCheckbox.checked) {
+
+              throw new Error(
+                "Please agree to the Terms and Privacy Policy."
+              );
+
+            }
+
+
+            const {
+              data,
+              error
+            } =
+              await supabaseClient.auth.signUp({
+
+                email: email,
+
+                password: password
+
+              });
+
+
+            if (error)
+              throw error;
+
+
+            if (
+              data.user &&
+              !data.session
+            ) {
+
+              resendVerification.classList.remove(
+                "hidden"
+              );
+
+              showAuthMessage(
+                "Account created. Please check your email to confirm your account, then log in."
+              );
+
+              return;
+
+            }
+
+
+            if (data.session) {
+
+              closeAuthModal();
+
+              await claimCredits();
+
+            }
+
+          }
+
+
+          /*
+            LOGIN
+          */
+
+          else {
+
+            const {
+              data,
+              error
+            } =
+              await supabaseClient.auth.signInWithPassword({
+
+                email: email,
+
+                password: password
+
+              });
+
+
+            if (error)
+              throw error;
+
+
+            closeAuthModal();
+
+            await updateAuthUI(
+              data.session
+            );
+
+          }
+
+
+        } catch (error) {
+
+          console.error(
+            "Authentication error:",
+            error
+          );
+
+
+          let message =
+            error.message ||
+            "Authentication failed.";
+
+
+          if (
+            message.toLowerCase().includes(
+              "invalid login credentials"
+            )
+          ) {
+
+            message =
+              "Invalid email or password. If you forgot your password, use Forgot password.";
+
+          }
+
+
+          showAuthMessage(
+            message,
+            "error"
+          );
+
+
+        } finally {
+
+          authSubmit.disabled =
+            false;
+
+          authSubmit.textContent =
+            authMode === "login"
+              ? "Login"
+              : "Create Account";
+
+        }
+
+      }
+    );
+
+
+    /*
+      FORGOT PASSWORD
+    */
+
+    forgotPasswordBtn.addEventListener(
+      "click",
+      async function () {
+
+        const email =
+          authEmail.value.trim();
+
+
+        if (!email) {
+
+          showAuthMessage(
+            "Enter your email address first.",
+            "error"
+          );
+
+          authEmail.focus();
+
+          return;
+
+        }
+
+
+        try {
+
+          forgotPasswordBtn.disabled =
+            true;
+
+          forgotPasswordBtn.textContent =
+            "Sending...";
+
+
+          const redirectUrl =
+            window.location.origin +
+            window.location.pathname;
+
+
+          const {
+            error
+          } =
+            await supabaseClient.auth.resetPasswordForEmail(
+              email,
+              {
+                redirectTo: redirectUrl
+              }
+            );
+
+
+          if (error)
+            throw error;
+
+
+          showAuthMessage(
+            "Password reset email sent. Check your inbox and follow the link to create a new password."
+          );
+
+
+        } catch (error) {
+
+          console.error(
+            "Password reset error:",
+            error
+          );
+
+
+          showAuthMessage(
+            error.message ||
+            "Unable to send password reset email.",
+            "error"
+          );
+
+
+        } finally {
+
+          forgotPasswordBtn.disabled =
+            false;
+
+          forgotPasswordBtn.textContent =
+            "Forgot password?";
+
+        }
+
+      }
+    );
+
+
+    /*
+      SAVE NEW PASSWORD
+    */
+
+    saveNewPassword.addEventListener(
+      "click",
+      async function () {
+
+        const password =
+          newPassword.value;
+
+        const confirmation =
+          newPasswordConfirm.value;
+
+
+        if (password.length < 8) {
+
+          showAuthMessage(
+            "Your new password must contain at least 8 characters.",
+            "error"
+          );
+
+          return;
+
+        }
+
+
+        if (password !== confirmation) {
+
+          showAuthMessage(
+            "The new passwords do not match.",
+            "error"
+          );
+
+          return;
+
+        }
+
+
+        try {
+
+          saveNewPassword.disabled =
+            true;
+
+          saveNewPassword.textContent =
+            "Saving...";
+
+
+          const {
+            error
+          } =
+            await supabaseClient.auth.updateUser({
+
+              password: password
+
+            });
+
+
+          if (error)
+            throw error;
+
+
+          recoveryMode = false;
+
+          showAuthMessage(
+            "Password changed successfully. You can now log in with your new password."
+          );
+
+
+          resetPasswordSection.classList.add(
+            "hidden"
+          );
+
+
+          authForm.classList.remove(
+            "hidden"
+          );
+
+
+          socialLogin.classList.remove(
+            "hidden"
+          );
+
+
+          orDivider.classList.remove(
+            "hidden"
+          );
+
+
+          authMode = "login";
+
+          openAuth("login");
+
+
+        } catch (error) {
+
+          console.error(
+            "Password update error:",
+            error
+          );
+
+
+          showAuthMessage(
+            error.message ||
+            "Unable to change your password.",
+            "error"
+          );
+
+
+        } finally {
+
+          saveNewPassword.disabled =
+            false;
+
+          saveNewPassword.textContent =
+            "Save new password";
+
+        }
+
+      }
+    );
+
+
+    /*
+      RESEND VERIFICATION EMAIL
+    */
+
+    resendVerification.addEventListener(
+      "click",
+      async function () {
+
+        const email =
+          authEmail.value.trim();
+
+
+        if (!email) {
+
+          showAuthMessage(
+            "Enter your email address first.",
+            "error"
+          );
+
+          return;
+
+        }
+
+
+        try {
+
+          resendVerification.disabled =
+            true;
+
+          resendVerification.textContent =
+            "Sending...";
+
+
+          const {
+            error
+          } =
+            await supabaseClient.auth.resend({
+
+              type: "signup",
+
+              email: email
+
+            });
+
+
+          if (error)
+            throw error;
+
+
+          showAuthMessage(
+            "A new verification email has been sent. Please check your inbox."
+          );
+
+
+        } catch (error) {
+
+          console.error(
+            "Resend verification error:",
+            error
+          );
+
+
+          showAuthMessage(
+            error.message ||
+            "Unable to resend verification email.",
+            "error"
+          );
+
+
+        } finally {
+
+          resendVerification.disabled =
+            false;
+
+          resendVerification.textContent =
+            "Resend verification email";
+
+        }
+
+      }
+    );
+
+
+    /*
+      GOOGLE LOGIN
+
+      Google must first be enabled
+      in Supabase Authentication Providers.
+    */
+
+    googleBtn.addEventListener(
+      "click",
+      async function () {
+
+        try {
+
+          googleBtn.disabled =
+            true;
+
+          googleBtn.textContent =
+            "Connecting to Google...";
+
+
+          const {
+            error
+          } =
+            await supabaseClient.auth.signInWithOAuth({
+
+              provider: "google",
+
+              options: {
+
+                redirectTo:
+                  window.location.origin +
+                  window.location.pathname
+
+              }
+
+            });
+
+
+          if (error)
+            throw error;
+
+
+        } catch (error) {
+
+          console.error(
+            "Google login error:",
+            error
+          );
+
+
+          showAuthMessage(
+            error.message ||
+            "Google login is not configured yet.",
+            "error"
+          );
+
+
+          googleBtn.disabled =
+            false;
+
+          googleBtn.textContent =
+            "🌐 Continue with Google";
+
+        }
+
+      }
+    );
+
+
+    /*
+      AUTH BUTTON
+    */
+
+    authBtn.addEventListener(
+      "click",
+      function () {
+
+        openAuth("login");
+
+      }
+    );
+
+
+    closeAuth.addEventListener(
+      "click",
+      closeAuthModal
+    );
+
+
+    authSwitch.addEventListener(
+      "click",
+      function () {
+
+        openAuth(
+          authMode === "login"
+            ? "signup"
+            : "login"
+        );
+
+      }
+    );
+
+
+    /*
+      LOGOUT
+    */
+
+    logoutBtn.addEventListener(
+      "click",
+      async function () {
+
+        await supabaseClient.auth.signOut();
+
+        creditCount.textContent =
+          "1";
+
+        authBtn.classList.remove(
+          "hidden"
+        );
+
+        logoutBtn.classList.add(
+          "hidden"
+        );
+
+      }
+    );
+
+
+    /*
+      AUTH STATE
+    */
+
+    supabaseClient.auth.onAuthStateChange(
+      async function (event, session) {
+
+        /*
+          PASSWORD RECOVERY
+        */
+
+        if (event === "PASSWORD_RECOVERY") {
+
+          recoveryMode = true;
+
+          authModal.classList.remove(
+            "hidden"
+          );
+
+          authTitle.textContent =
+            "Create a new password";
+
+          authSubtitle.textContent =
+            "Choose a new password for your QV37 account.";
+
+          authForm.classList.add(
+            "hidden"
+          );
+
+          socialLogin.classList.add(
+            "hidden"
+          );
+
+          orDivider.classList.add(
+            "hidden"
+          );
+
+          authSwitch.classList.add(
+            "hidden"
+          );
+
+          resetPasswordSection.classList.remove(
+            "hidden"
+          );
+
+          return;
+
+        }
+
+
+        await updateAuthUI(
+          session
+        );
+
+      }
+    );
+
+
+    /*
+      AI GENERATION
+    */
+
+    generateBtn.addEventListener(
+      "click",
+      async function () {
+
+        const prompt =
+          promptBox.value.trim();
+
+
+        if (!prompt) {
+
+          showStatus(
+            "Please describe the website or app you want.",
+            "error"
+          );
+
+          return;
+
+        }
+
+
+        const {
+          data: sessionData
+        } =
+          await supabaseClient.auth.getSession();
+
+
+        const session =
+          sessionData.session;
+
+
+        addUserMessage(prompt);
+
+        promptBox.value = "";
+
+        setLoading(true);
+
+
+        showStatus(
+          "QV37 AI is generating your application..."
+        );
+
+
+        try {
+
+          const headers = {
+
+            "Content-Type":
+              "application/json"
+
+          };
+
+
+          if (session) {
+
+            headers.Authorization =
+              "Bearer " +
+              session.access_token;
+
+          }
+
+
+          const response =
+            await fetch(
+              "/api/generate",
+              {
+
+                method: "POST",
+
+                headers: headers,
+
+                body: JSON.stringify({
+
+                  prompt: prompt
+
+                })
+
+              }
+            );
+
+
+          const data =
+            await response.json();
+
+
+          if (!response.ok) {
+
+            if (
+              data.error &&
+              data.error.toLowerCase().includes(
+                "anonymous"
+              )
+            ) {
+
+              addAIMessage(
+                "Login for more credits to build apps and websites."
+              );
+
+
+              showStatus(
+                "Login for more credits to build apps and websites.",
+                "error"
+              );
+
+
+              openAuth("login");
+
+
+              return;
+
+            }
+
+
+            throw new Error(
+              data.error ||
+              "AI generation failed."
+            );
+
+          }
+
+
+          const generatedHTML =
+            data.html;
+
+
+          if (
+            typeof generatedHTML !== "string" ||
+            generatedHTML.trim().length < 50
+          ) {
+
+            throw new Error(
+              "The AI returned no usable application."
+            );
+
+          }
+
+
+          previewFrame.srcdoc =
+            generatedHTML;
+
+
+          previewSection.classList.remove(
+            "hidden"
+          );
+
+
+          if (
+            typeof data.credits !==
+            "undefined"
+          ) {
+
+            creditCount.textContent =
+              Number(data.credits);
+
+          }
+
+
+          addAIMessage(
+            "Your application has been generated successfully. The live preview is shown below."
+          );
+
+
+          if (
+            Number(data.credits) === 0
+          ) {
+
+            if (data.anonymous) {
+
+              addAIMessage(
+                "Login for more credits to build apps and websites."
+              );
+
+            } else {
+
+              addAIMessage(
+                "You've used all your free credits 🎉 Get more credits to keep building apps and websites."
+              );
+
+            }
+
+          }
+
+
+          hideStatus();
+
+          scrollToBottom();
+
+
+        } catch (error) {
+
+          console.error(
+            "QV37 AI error:",
+            error
+          );
+
+
+          addAIMessage(
+            error.message ||
+            "Unable to generate the application."
+          );
+
+
+          showStatus(
+            error.message ||
+            "Unable to generate the application.",
+            "error"
+          );
+
+
+        } finally {
+
+          setLoading(false);
+
+        }
+
+      }
+    );
+
+
+    /*
+      CTRL + ENTER
+    */
+
+    promptBox.addEventListener(
+      "keydown",
+      function (event) {
+
+        if (
+          event.key === "Enter" &&
+          (
+            event.ctrlKey ||
+            event.metaKey
+          )
+        ) {
+
+          event.preventDefault();
+
+          generateBtn.click();
+
+        }
+
+      }
+    );
+
+
+    /*
+      EXAMPLES
+    */
+
+    document
+      .querySelectorAll(".example-btn")
+      .forEach(function (button) {
+
+        button.addEventListener(
+          "click",
+          function () {
+
+            promptBox.value =
+              this.dataset.prompt;
+
+            promptBox.focus();
+
+          }
+
+        );
+
+      });
+
+
+    /*
+      INITIAL AUTH CHECK
+    */
+
+    async function initializeQV37() {
+
+      const {
+        data
+      } =
+        await supabaseClient.auth.getSession();
+
+
+      await updateAuthUI(
+        data.session
+      );
+
+    }
+
+
+    initializeQV37();
+
+  </script>
+
+</body>
+</html>
